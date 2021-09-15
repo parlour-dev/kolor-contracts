@@ -51,4 +51,22 @@ describe("TCPData", function () {
     // check whether the balance was reset after the withdrawal
     expect(await tcpdata.getBalance()).to.equal(0)
   })
+
+  it("Should return all the content upon calling getContent", async () => {
+    const header1 = '{title: "test content 1"}'
+    const header2 = '{title: "test content 2"}'
+
+    await tcpdata.addContent(header1)
+    await tcpdata.addContent(header2)
+
+    const all_content = await tcpdata.getContent()
+    const [ last_header, last_author, last_idx ] = await tcpdata.getLastContent()
+
+    expect(last_header).to.equal(all_content[all_content.length-1].header)
+    expect(last_author).to.equal(all_content[all_content.length-1].author)
+    expect(last_idx).to.equal(all_content.length-1)
+
+    expect(all_content[all_content.length-1].header).to.equal(header2)
+    expect(all_content[all_content.length-2].header).to.equal(header1)
+  })
 });
