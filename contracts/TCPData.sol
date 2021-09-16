@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
-//import "hardhat/console.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract TCPData {
+contract TCPData is Initializable {
     event ContentAdded(uint indexed idx);
 
     struct Content {
@@ -15,7 +15,7 @@ contract TCPData {
 
     mapping(address => uint256) accountBalances;
 
-    constructor () {
+    function initialize() public initializer {
         content.push(Content({ author: payable(msg.sender), header: '{"title": "The First Text Post", "tags": ["text", "first", "small"], "url": "https://ipfs.io/ipfs/QmNrgEMcUygbKzZeZgYFosdd27VE9KnWbyUD73bKZJ3bGi"}' }));
     }
 

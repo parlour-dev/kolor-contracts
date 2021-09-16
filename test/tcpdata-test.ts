@@ -1,7 +1,8 @@
 import { TCPData } from "../types/TCPData"
+import { TestUpgrade } from "../types/TestUpgrade"
 
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 describe("TCPData", function () {
@@ -10,7 +11,7 @@ describe("TCPData", function () {
 
   beforeEach(async () => {
     const TCPData = await ethers.getContractFactory("TCPData");
-    tcpdata = await TCPData.deploy() as TCPData;
+    tcpdata = await upgrades.deployProxy(TCPData) as TCPData;
 
     [ signer, addr1 ] = await ethers.getSigners()
 
@@ -71,5 +72,18 @@ describe("TCPData", function () {
 
     expect(all_content[all_content.length-1].header).to.equal(header2)
     expect(all_content[all_content.length-2].header).to.equal(header1)
+  })
+
+  it("Should be able to upgrade", async () => {
+    const TestUpgrade = await ethers.getContractFactory("TestUpgrade")
+
+    const address_expected = tcpdata.address
+    const [ , author_expected,  ] = await tcpdata.getLastContent()
+
+    const tcpdata_upgraded: TestUpgrade = await upgrades.upgradeProxy(tcpdata.address, TestUpgrade) as TestUpgrade
+
+    expect(tcpdata_upgraded.address).to.equal(address_expected)
+    expect(await tcpdata_upgraded.test()).to.equal(123)
+    expect(await tcpdata_upgraded.getLastContentAuthor()).to.equal(author_expected)
   })
 });
