@@ -4,7 +4,6 @@ node_modules
 #Hardhat files
 cache
 artifacts
-
-#Test-related files
 coverage
 coverage.json
+types

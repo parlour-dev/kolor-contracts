@@ -1,13 +1,16 @@
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
+import { TCPData } from "../types/TCPData"
+
+import { expect } from "chai";
+import { ethers } from "hardhat";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 describe("TCPData", function () {
-  let tcpdata
-  let signer, addr1
+  let tcpdata: TCPData
+  let signer: SignerWithAddress, addr1: SignerWithAddress
 
   beforeEach(async () => {
     const TCPData = await ethers.getContractFactory("TCPData");
-    tcpdata = await TCPData.deploy();
+    tcpdata = await TCPData.deploy() as TCPData;
 
     [ signer, addr1 ] = await ethers.getSigners()
 
