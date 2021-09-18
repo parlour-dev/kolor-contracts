@@ -56,6 +56,12 @@ describe("TCPData", function () {
     expect(await tcpdata.getBalance()).to.equal(0)
   })
 
+  it("Should disallow too large uploads", async () => {
+    const header = 'ab'.repeat(2000)
+
+    expect(tcpdata.addContent(header)).to.be.revertedWith("Too large.")
+  })
+
   it("Should return all the content upon calling getContent", async () => {
     const header1 = '{title: "test content 1"}'
     const header2 = '{title: "test content 2"}'

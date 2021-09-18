@@ -20,6 +20,7 @@ contract TCPData is Initializable {
     }
 
     function addContent(string calldata newHeader) public {
+        require(bytes(newHeader).length < 2000, "Too large.");
         content.push(Content({author: payable(msg.sender), header: newHeader }));
         emit ContentAdded(content.length-1);
     }
