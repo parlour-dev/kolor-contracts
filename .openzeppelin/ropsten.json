@@ -1,0 +1,161 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0x83bEaC46471d58D45d770F7018356D93f7e5eA8E",
+    "txHash": "0x5c6708b9061172a574837edfe93655723de9c6acf25217582929afef6d333c34"
+  },
+  "proxies": [
+    {
+      "address": "0xa398De2fEF0b37cf50c2F9D88b8953b94b49c78C",
+      "txHash": "0xc72fb09b9a32350233154b9d89c32278a9e65dedff1b81cae22d8e4eb821477d",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "ac6085a9603ff4d629e54e87bfbdcefb7b8ca90fcab9db077ba200cc05aa22f3": {
+      "address": "0x914E4FcfCC7dD3A6b3514143E32C3188eDFc3d9f",
+      "txHash": "0x1bbad2ec478ed0d2f56df017f606e2e944759b09699ec391f405182a534d65da",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:26"
+          },
+          {
+            "contract": "TCPData",
+            "label": "content",
+            "type": "t_array(t_struct(Content)59_storage)dyn_storage",
+            "src": "contracts/TCPData.sol:14"
+          },
+          {
+            "contract": "TCPData",
+            "label": "accountBalances",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "contracts/TCPData.sol:16"
+          }
+        ],
+        "types": {
+          "t_array(t_struct(Content)59_storage)dyn_storage": {
+            "label": "struct TCPData.Content[]"
+          },
+          "t_struct(Content)59_storage": {
+            "label": "struct TCPData.Content",
+            "members": [
+              {
+                "label": "author",
+                "type": "t_address_payable"
+              },
+              {
+                "label": "header",
+                "type": "t_string_storage"
+              }
+            ]
+          },
+          "t_address_payable": {
+            "label": "address payable"
+          },
+          "t_string_storage": {
+            "label": "string"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "f5a5cf8e93372382c0f323d600d7e8be83cffb6b139df3924450ef4807516e0f": {
+      "address": "0xFEc8d2071fD4916FaacB60C4EFC35831ec62a54B",
+      "txHash": "0x49151ed0b90e831280d75c4af8395079ed697d326d253114696c631750506b58",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:26"
+          },
+          {
+            "contract": "TCPData",
+            "label": "content",
+            "type": "t_array(t_struct(Content)220_storage)dyn_storage",
+            "src": "contracts/TCPData.sol:14"
+          },
+          {
+            "contract": "TCPData",
+            "label": "accountBalances",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "contracts/TCPData.sol:16"
+          },
+          {
+            "contract": "TCPData",
+            "label": "contentBalances",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "contracts/TCPData.sol:17"
+          }
+        ],
+        "types": {
+          "t_array(t_struct(Content)220_storage)dyn_storage": {
+            "label": "struct TCPData.Content[]"
+          },
+          "t_struct(Content)220_storage": {
+            "label": "struct TCPData.Content",
+            "members": [
+              {
+                "label": "author",
+                "type": "t_address_payable"
+              },
+              {
+                "label": "header",
+                "type": "t_string_storage"
+              }
+            ]
+          },
+          "t_address_payable": {
+            "label": "address payable"
+          },
+          "t_string_storage": {
+            "label": "string"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    }
+  }
+}

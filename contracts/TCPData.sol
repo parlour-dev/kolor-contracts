@@ -14,39 +14,52 @@ contract TCPData is Initializable {
     Content[] public content;
 
     mapping(address => uint256) accountBalances;
+    mapping(uint256 => uint256) contentBalances;
 
-    function initialize() public initializer {
+    event TipReceived(uint indexed idx, uint amount);
+
+    function initialize() external initializer {
         content.push(Content({ author: payable(msg.sender), header: '{"title": "The First Text Post", "tags": ["text", "first", "small"], "url": "https://ipfs.io/ipfs/QmNrgEMcUygbKzZeZgYFosdd27VE9KnWbyUD73bKZJ3bGi"}' }));
     }
 
-    function addContent(string calldata newHeader) public {
+    function addContent(string calldata newHeader) external {
         require(bytes(newHeader).length < 2000, "Too large.");
         content.push(Content({author: payable(msg.sender), header: newHeader }));
         emit ContentAdded(content.length-1);
     }
 
-    function getContentLength() public view returns (uint) {
+    function getContentLength() external view returns (uint) {
         return content.length;
     }
 
-    function getLastContent() public view returns (string memory, address payable, uint) {
+    function getLastContent() external view returns (string memory, address payable, uint) {
         uint256 lastIdx = content.length-1;
         return (content[lastIdx].header, content[lastIdx].author, lastIdx);
     }
 
-    function getContent() public view returns (Content[] memory) {
+    function getContent() external view returns (Content[] memory) {
         return content;
     }
 
-    function tipAuthor(uint idx) public payable {
+    function tipContent(uint idx) external payable {
         accountBalances[content[idx].author] += msg.value;
+        contentBalances[idx] += msg.value;
+        emit TipReceived(idx, msg.value);
     }
 
-    function getBalance() public view returns (uint) {
+    function tipPerson(address payable who) external payable {
+        accountBalances[who] += msg.value;
+    }
+
+    function getBalance() external view returns (uint) {
         return accountBalances[msg.sender];
     }
 
-    function withdrawBalance() public { 
+    function getContentBalance(uint idx) external view returns (uint) {
+        return contentBalances[idx];
+    }
+
+    function withdrawBalance() external { 
         // checks-effects-interactions
         uint256 amount = accountBalances[msg.sender];
         accountBalances[msg.sender] = 0;

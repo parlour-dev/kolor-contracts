@@ -7,13 +7,13 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 describe("TCPData", function () {
   let tcpdata: TCPData
-  let signer: SignerWithAddress, addr1: SignerWithAddress
+  let signer: SignerWithAddress, addr1: SignerWithAddress, addr2: SignerWithAddress
 
   beforeEach(async () => {
     const TCPData = await ethers.getContractFactory("TCPData");
     tcpdata = await upgrades.deployProxy(TCPData) as TCPData;
 
-    [ signer, addr1 ] = await ethers.getSigners()
+    [ signer, addr1, addr2 ] = await ethers.getSigners()
 
     await tcpdata.deployed();
   })
@@ -34,7 +34,33 @@ describe("TCPData", function () {
     expect(idx_actual).to.equal(1)
   })
 
-  it("Should allow tips and withdrawals", async () => {
+  it("Should emit events when tipping", async () => {
+    const [ _, __, idx ] = await tcpdata.getLastContent()
+    const tip_amount = ethers.BigNumber.from("1000000000000000000") // 1 ETH
+
+    await expect(await tcpdata.connect(addr2).tipContent(idx, { value: tip_amount }))
+    .to.emit(tcpdata, "TipReceived").withArgs(idx, tip_amount);
+  })
+
+  it("Should allow to tip people", async () => {
+    const tipped = addr2
+    const tipper = addr1
+    const tip_amount = 0x12345
+
+    // the account that will get the tip should not have any funds
+    expect(await tcpdata.connect(tipped).getBalance()).to.equal(0)
+
+    // send the tip
+    await tcpdata.connect(tipper).tipPerson(addr2.address, { value: tip_amount })
+
+    // the contract balance of the tipped should now increase
+    expect(await tcpdata.connect(tipped).getBalance()).to.equal(tip_amount)
+
+    // the tipped should be able to withdraw
+    expect(await tcpdata.connect(tipped).withdrawBalance()).to.changeEtherBalance(tipped, tip_amount)
+  })
+  
+  it("Should allow content tips and withdrawals", async () => {
     const balance_before = await addr1.getBalance()
     const [ _, __, idx ] = await tcpdata.getLastContent()
 
@@ -42,11 +68,12 @@ describe("TCPData", function () {
     
 
     // check whether the tipper's account balance is decreased
-    await expect(await tcpdata.connect(addr1).tipAuthor(idx, { value: tip_amount }))
+    await expect(await tcpdata.connect(addr1).tipContent(idx, { value: tip_amount }))
       .to.changeEtherBalance(addr1, -tip_amount)
 
     // check whether the receiver's contract balance is increased
     expect(await tcpdata.getBalance()).to.equal(tip_amount)
+    expect(await tcpdata.getContentBalance(idx)).to.equal(tip_amount)
 
     // check whether the receiver can withdraw the contract balance
     await expect(await tcpdata.withdrawBalance())
@@ -54,6 +81,8 @@ describe("TCPData", function () {
 
     // check whether the balance was reset after the withdrawal
     expect(await tcpdata.getBalance()).to.equal(0)
+    // the content balance should stay unchanged
+    expect(await tcpdata.getContentBalance(idx)).to.equal(tip_amount)
   })
 
   it("Should disallow too large uploads", async () => {

@@ -4,7 +4,6 @@ node_modules
 setup_env.sh
 
 #Hardhat files
-.openzeppelin
 cache
 artifacts
 coverage
