@@ -15,6 +15,7 @@ contract TCPData is Initializable {
 
     mapping(address => uint256) accountBalances;
     mapping(uint256 => uint256) contentBalances;
+    mapping(uint256 => uint256) contentTimestamps;
 
     event TipReceived(uint indexed idx, uint amount);
 
@@ -25,7 +26,17 @@ contract TCPData is Initializable {
     function addContent(string calldata newHeader) external {
         require(bytes(newHeader).length < 2000, "Too large.");
         content.push(Content({author: payable(msg.sender), header: newHeader }));
-        emit ContentAdded(content.length-1);
+
+        uint idx = content.length-1;
+        contentTimestamps[idx] = block.timestamp;
+        emit ContentAdded(idx);
+    }
+
+    function removeContent(uint idx) external {
+        require(content[idx].author == msg.sender, "Not author");
+        require(contentTimestamps[idx] + 3 days > block.timestamp, "Too late");
+
+        content[idx].header = '';
     }
 
     function getContentLength() external view returns (uint) {
@@ -57,6 +68,10 @@ contract TCPData is Initializable {
 
     function getContentBalance(uint idx) external view returns (uint) {
         return contentBalances[idx];
+    }
+
+    function getContentTimestamp(uint idx) external view returns (uint) {
+        return contentTimestamps[idx];
     }
 
     function withdrawBalance() external { 

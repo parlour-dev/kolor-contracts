@@ -2,7 +2,7 @@ import { TCPData } from "../types/TCPData"
 import { TestUpgrade } from "../types/TestUpgrade"
 
 import { expect } from "chai";
-import { ethers, upgrades } from "hardhat";
+import { ethers, upgrades, network } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 describe("TCPData", function () {
@@ -32,6 +32,12 @@ describe("TCPData", function () {
     expect(header_actual).to.equal(header_expected)
     expect(address_actual).to.equal(signer.address)
     expect(idx_actual).to.equal(1)
+  })
+
+  it("Should save post timestamps", async () => {
+    await tcpdata.addContent("{ffff}");
+    const [ , , idx_actual ] = await tcpdata.getLastContent()
+    expect(await tcpdata.getContentTimestamp(idx_actual)).to.equal((await addr1.provider?.getBlock("latest"))?.timestamp)
   })
 
   it("Should emit events when tipping", async () => {
@@ -120,5 +126,44 @@ describe("TCPData", function () {
     expect(tcpdata_upgraded.address).to.equal(address_expected)
     expect(await tcpdata_upgraded.test()).to.equal(123)
     expect(await tcpdata_upgraded.getLastContentAuthor()).to.equal(author_expected)
+  })
+
+  it("Should allow to remove posts", async () => {
+    const header_initial = '{ "title": "test" }'
+
+    await tcpdata.addContent(header_initial)
+
+    const [ header_actual_first, , idx_actual ] = await tcpdata.getLastContent()
+
+    expect(header_actual_first).to.equal(header_initial)
+
+    await tcpdata.removeContent(idx_actual)
+
+    const [ header_actual_second, , ] = await tcpdata.getLastContent()
+
+    expect(header_actual_second).to.equal('')
+  })
+
+  it("Should forbid non-authors to remove a post", async () => {
+    const header_initial = '{ "title": "test" }'
+
+    await tcpdata.connect(addr1).addContent(header_initial)
+
+    const [ header_actual_first, , idx_actual ] = await tcpdata.getLastContent()
+
+    expect(header_actual_first).to.equal(header_initial)
+
+    await expect(tcpdata.removeContent(idx_actual)).to.be.revertedWith("Not author")
+  })
+
+  it("Should forbit too late removals", async () => { 
+    await tcpdata.addContent('{ "title": "test" }')
+    const [ , , idx_actual ] = await tcpdata.getLastContent();
+
+    // advance the clock by 3 days (in seconds) and mine a block with a modified timestamp
+    await network.provider.send("evm_increaseTime", [60*60*24*3])
+    await network.provider.send("evm_mine")
+
+    await expect(tcpdata.removeContent(idx_actual)).to.be.revertedWith("Too late")
   })
 });
