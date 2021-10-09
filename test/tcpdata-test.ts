@@ -128,7 +128,7 @@ describe("TCPData", function () {
     expect(await tcpdata_upgraded.getLastContentAuthor()).to.equal(author_expected)
   })
 
-  it("Should allow to remove posts", async () => {
+  it("Should allow the author to remove posts", async () => {
     const header_initial = '{ "title": "test" }'
 
     await tcpdata.addContent(header_initial)
@@ -144,6 +144,20 @@ describe("TCPData", function () {
     expect(header_actual_second).to.equal('')
   })
 
+  it("Should allow the owner to remove posts", async () => {
+    const header_initial = '{ "title": "test" }'
+
+    await tcpdata.connect(addr1).addContent(header_initial)
+
+    const [ , , idx_actual ] = await tcpdata.getLastContent()
+
+    await tcpdata.connect(signer).removeContent(idx_actual)
+
+    const [ header_actual_second, , idx_actual_second ] = await tcpdata.getLastContent()
+    expect(header_actual_second).to.equal('')
+    expect(idx_actual).to.equal(idx_actual_second)
+  })
+
   it("Should forbid non-authors to remove a post", async () => {
     const header_initial = '{ "title": "test" }'
 
@@ -153,14 +167,14 @@ describe("TCPData", function () {
 
     expect(header_actual_first).to.equal(header_initial)
 
-    await expect(tcpdata.removeContent(idx_actual)).to.be.revertedWith("Not author")
+    await expect(tcpdata.connect(addr2).removeContent(idx_actual)).to.be.revertedWith("No access")
   })
 
-  it("Should forbit too late removals", async () => { 
+  it("Should forbid too late removals", async () => { 
     await tcpdata.addContent('{ "title": "test" }')
     const [ , , idx_actual ] = await tcpdata.getLastContent();
 
-    // advance the clock by 3 days (in seconds) and mine a block with a modified timestamp
+    // advance the clock by 3 days (in seconds) and mine a block with the modified timestamp
     await network.provider.send("evm_increaseTime", [60*60*24*3])
     await network.provider.send("evm_mine")
 

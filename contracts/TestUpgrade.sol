@@ -15,6 +15,8 @@ contract TestUpgrade is Initializable {
     mapping(uint256 => uint256) contentBalances;
     mapping(uint256 => uint256) contentTimestamps;
 
+    address owner;
+
     function test() external pure returns (uint) {
         return 123;
     }

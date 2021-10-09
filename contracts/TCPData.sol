@@ -17,10 +17,13 @@ contract TCPData is Initializable {
     mapping(uint256 => uint256) contentBalances;
     mapping(uint256 => uint256) contentTimestamps;
 
+    address public owner;
+
     event TipReceived(uint indexed idx, uint amount);
 
     function initialize() external initializer {
         content.push(Content({ author: payable(msg.sender), header: '{"title": "The First Text Post", "tags": ["text", "first", "small"], "url": "https://ipfs.io/ipfs/QmNrgEMcUygbKzZeZgYFosdd27VE9KnWbyUD73bKZJ3bGi"}' }));
+        owner = msg.sender;
     }
 
     function addContent(string calldata newHeader) external {
@@ -33,7 +36,7 @@ contract TCPData is Initializable {
     }
 
     function removeContent(uint idx) external {
-        require(content[idx].author == msg.sender, "Not author");
+        require(content[idx].author == msg.sender || owner == msg.sender, "No access");
         require(contentTimestamps[idx] + 3 days > block.timestamp, "Too late");
 
         content[idx].header = '';

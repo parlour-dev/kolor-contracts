@@ -3,6 +3,8 @@ node_modules
 
 setup_env.sh
 
+.openzeppelin/unknown-1337.json
+
 #Hardhat files
 cache
 artifacts
