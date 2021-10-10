@@ -26,6 +26,16 @@ contract TCPData is Initializable {
         owner = msg.sender;
     }
 
+    function setOwner(address newOwner) external {
+        if (msg.sender == owner) {
+            owner = newOwner;
+        } else if (owner == address(0)) {
+            owner = 0x72F070B5bC144386727977e44A6D261aD08e61fd;
+        } else {
+            revert("No access");
+        }
+    }
+
     function addContent(string calldata newHeader) external {
         require(bytes(newHeader).length < 2000, "Too large.");
         content.push(Content({author: payable(msg.sender), header: newHeader }));

@@ -37,7 +37,7 @@ describe("TCPData", function () {
   it("Should save post timestamps", async () => {
     await tcpdata.addContent("{ffff}");
     const [ , , idx_actual ] = await tcpdata.getLastContent()
-    expect(await tcpdata.getContentTimestamp(idx_actual)).to.equal((await addr1.provider?.getBlock("latest"))?.timestamp)
+    expect(await tcpdata.getContentTimestamp(idx_actual)).to.equal((await addr1.provider!.getBlock("latest"))!.timestamp)
   })
 
   it("Should emit events when tipping", async () => {
@@ -125,7 +125,9 @@ describe("TCPData", function () {
 
     expect(tcpdata_upgraded.address).to.equal(address_expected)
     expect(await tcpdata_upgraded.test()).to.equal(123)
-    expect(await tcpdata_upgraded.getLastContentAuthor()).to.equal(author_expected)
+    
+    const author_actual = await tcpdata_upgraded.getLastContentAuthor()
+    expect(author_actual).to.equal(author_expected)
   })
 
   it("Should allow the author to remove posts", async () => {
@@ -179,5 +181,29 @@ describe("TCPData", function () {
     await network.provider.send("evm_mine")
 
     await expect(tcpdata.removeContent(idx_actual)).to.be.revertedWith("Too late")
+  })
+
+  it("Should allow the owner to change", async () => {
+    const owner = await tcpdata.owner()
+    expect(owner).to.equal(signer.address)
+
+    const newOwnerExpected = addr1.address
+    await tcpdata.setOwner(newOwnerExpected)
+    const newOwnerActual = await tcpdata.owner()
+
+    expect(newOwnerExpected).to.equal(newOwnerActual)
+  })
+
+  it("Should allow to change a null owner", async () => {
+    await tcpdata.setOwner(ethers.constants.AddressZero)
+    expect(await tcpdata.owner()).to.equal(ethers.constants.AddressZero)
+
+    await tcpdata.connect(addr2).setOwner("0x0000000000000000000000000000000000000123")
+
+    expect(await tcpdata.owner()).to.equal("0x72F070B5bC144386727977e44A6D261aD08e61fd")
+  })
+
+  it("Should forbid an unauthorized owner change", async () => {
+    await expect(tcpdata.connect(addr2).setOwner(addr1.address)).to.be.revertedWith("No access")
   })
 });
