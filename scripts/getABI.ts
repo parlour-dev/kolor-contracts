@@ -1,8 +1,10 @@
+import { ethers } from "ethers";
 import hre from "hardhat";
 
 async function main() {
   const tcpdataArtifact = await hre.artifacts.readArtifact("contracts/TCPData.sol:TCPData")
-  console.log(tcpdataArtifact.abi)
+  const iface = new ethers.utils.Interface(tcpdataArtifact.abi)
+  console.log(iface.format(ethers.utils.FormatTypes.full))
 }
 
 main()
