@@ -206,4 +206,8 @@ describe("TCPData", function () {
   it("Should forbid an unauthorized owner change", async () => {
     await expect(tcpdata.connect(addr2).setOwner(addr1.address)).to.be.revertedWith("No access")
   })
+
+  it("Should return a version", async () => {
+    expect(await tcpdata.version()).to.equal(3)
+  })
 });

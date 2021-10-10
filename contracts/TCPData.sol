@@ -21,9 +21,15 @@ contract TCPData is Initializable {
 
     event TipReceived(uint indexed idx, uint amount);
 
+    // MANAGEMENT
+
     function initialize() external initializer {
         content.push(Content({ author: payable(msg.sender), header: '{"title": "The First Text Post", "tags": ["text", "first", "small"], "url": "https://ipfs.io/ipfs/QmNrgEMcUygbKzZeZgYFosdd27VE9KnWbyUD73bKZJ3bGi"}' }));
         owner = msg.sender;
+    }
+
+    function version() external pure returns (uint) {
+        return 3;
     }
 
     function setOwner(address newOwner) external {
@@ -35,6 +41,8 @@ contract TCPData is Initializable {
             revert("No access");
         }
     }
+
+    // CONTENT CREATION AND REMOVAL
 
     function addContent(string calldata newHeader) external {
         require(bytes(newHeader).length < 2000, "Too large.");
@@ -52,6 +60,8 @@ contract TCPData is Initializable {
         content[idx].header = '';
     }
 
+    // CONTENT GETTERS
+
     function getContentLength() external view returns (uint) {
         return content.length;
     }
@@ -64,6 +74,8 @@ contract TCPData is Initializable {
     function getContent() external view returns (Content[] memory) {
         return content;
     }
+
+    // TIPPING
 
     function tipContent(uint idx) external payable {
         accountBalances[content[idx].author] += msg.value;
