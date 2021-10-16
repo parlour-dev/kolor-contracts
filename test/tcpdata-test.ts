@@ -54,13 +54,13 @@ describe("TCPData", function () {
     const tip_amount = 0x12345
 
     // the account that will get the tip should not have any funds
-    expect(await tcpdata.connect(tipped).getBalance()).to.equal(0)
+    expect(await tcpdata.getBalance(tipped.address)).to.equal(0)
 
     // send the tip
     await tcpdata.connect(tipper).tipPerson(addr2.address, { value: tip_amount })
 
     // the contract balance of the tipped should now increase
-    expect(await tcpdata.connect(tipped).getBalance()).to.equal(tip_amount)
+    expect(await tcpdata.getBalance(tipped.address)).to.equal(tip_amount)
 
     // the tipped should be able to withdraw
     expect(await tcpdata.connect(tipped).withdrawBalance()).to.changeEtherBalance(tipped, tip_amount)
@@ -78,7 +78,7 @@ describe("TCPData", function () {
       .to.changeEtherBalance(addr1, -tip_amount)
 
     // check whether the receiver's contract balance is increased
-    expect(await tcpdata.getBalance()).to.equal(tip_amount)
+    expect(await tcpdata.getBalance(signer.address)).to.equal(tip_amount)
     expect(await tcpdata.getContentBalance(idx)).to.equal(tip_amount)
 
     // check whether the receiver can withdraw the contract balance
@@ -86,7 +86,7 @@ describe("TCPData", function () {
       .to.changeEtherBalance(signer, tip_amount)
 
     // check whether the balance was reset after the withdrawal
-    expect(await tcpdata.getBalance()).to.equal(0)
+    expect(await tcpdata.getBalance(signer.address)).to.equal(0)
     // the content balance should stay unchanged
     expect(await tcpdata.getContentBalance(idx)).to.equal(tip_amount)
   })

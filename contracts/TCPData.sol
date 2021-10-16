@@ -87,8 +87,8 @@ contract TCPData is Initializable {
         accountBalances[who] += msg.value;
     }
 
-    function getBalance() external view returns (uint) {
-        return accountBalances[msg.sender];
+    function getBalance(address target) external view returns (uint) {
+        return accountBalances[target];
     }
 
     function getContentBalance(uint idx) external view returns (uint) {
