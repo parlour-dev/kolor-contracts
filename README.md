@@ -23,7 +23,8 @@ node scripts/sample-script.js
 The contract is presently deployed at:
 
 ```
-0xa398De2fEF0b37cf50c2F9D88b8953b94b49c78C
+Ropsten: 0x0D3E48e537F69d4BDbdc84a1A5BbD70Ad1fD0756
+BSCTestnet: 0xa398De2fEF0b37cf50c2F9D88b8953b94b49c78C
 ```
 
 To get the ABI, first check out the latest version and then run getABI: 
