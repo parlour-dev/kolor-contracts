@@ -24,12 +24,11 @@ contract TCPData is Initializable {
     // MANAGEMENT
 
     function initialize() external initializer {
-        content.push(Content({ author: payable(msg.sender), header: '{"title": "The First Text Post", "tags": ["text", "first", "small"], "url": "https://ipfs.io/ipfs/QmNrgEMcUygbKzZeZgYFosdd27VE9KnWbyUD73bKZJ3bGi"}' }));
-        owner = msg.sender;
+        owner = 0x72F070B5bC144386727977e44A6D261aD08e61fd;
     }
 
     function version() external pure returns (uint) {
-        return 3;
+        return 4;
     }
 
     function setOwner(address newOwner) external {

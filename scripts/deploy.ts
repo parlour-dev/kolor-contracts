@@ -15,6 +15,7 @@ async function main() {
 
   const TCPData = await hre.ethers.getContractFactory("TCPData");
   const tcpdata = await upgrades.deployProxy(TCPData);
+
   await tcpdata.deployed();
 
   console.log("TCPData deployed to:", tcpdata.address);
