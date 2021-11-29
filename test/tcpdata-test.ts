@@ -4,6 +4,7 @@ import { TestUpgrade } from "../types/TestUpgrade"
 import { expect } from "chai";
 import { ethers, upgrades, network } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { BigNumber } from "@ethersproject/bignumber";
 
 describe("TCPData", function () {
   let tcpdata: TCPData
@@ -18,20 +19,18 @@ describe("TCPData", function () {
     await tcpdata.deployed();
   })
 
-  it("Should include one content header automatically", async () => {
-    expect(await tcpdata.getContentLength()).to.equal(1);
-  })
-
   it("Should be able to store a value", async () => {
     const header_expected = '{ "title": "test" }'
 
-    await expect(await tcpdata.addContent(header_expected)).to.emit(tcpdata, "ContentAdded").withArgs(1)
-    
+    await tcpdata.addContent(header_expected)
+
+    expect(await tcpdata.getContentLength()).to.equal(1)
+
     const [ header_actual, address_actual, idx_actual ] = await tcpdata.getLastContent()
 
     expect(header_actual).to.equal(header_expected)
     expect(address_actual).to.equal(signer.address)
-    expect(idx_actual).to.equal(1)
+    expect(idx_actual).to.equal(0)
   })
 
   it("Should save post timestamps", async () => {
@@ -41,6 +40,7 @@ describe("TCPData", function () {
   })
 
   it("Should emit events when tipping", async () => {
+    await tcpdata.addContent("{ffff}");
     const [ _, __, idx ] = await tcpdata.getLastContent()
     const tip_amount = ethers.BigNumber.from("1000000000000000000") // 1 ETH
 
@@ -67,6 +67,8 @@ describe("TCPData", function () {
   })
   
   it("Should allow content tips and withdrawals", async () => {
+    await tcpdata.addContent("{ffff}");
+
     const balance_before = await addr1.getBalance()
     const [ _, __, idx ] = await tcpdata.getLastContent()
 
@@ -116,6 +118,8 @@ describe("TCPData", function () {
   })
 
   it("Should be able to upgrade", async () => {
+    await tcpdata.addContent("{mmmmnnnn}")
+
     const TestUpgrade = await ethers.getContractFactory("TestUpgrade")
 
     const address_expected = tcpdata.address
@@ -148,12 +152,19 @@ describe("TCPData", function () {
 
   it("Should allow the owner to remove posts", async () => {
     const header_initial = '{ "title": "test" }'
+    const owner = new ethers.Wallet(process.env.ROPSTEN_PRIVATE_KEY || "", ethers.provider)
+
+    await addr1.sendTransaction({
+      from: addr1.address,
+      to: owner.address,
+      value: BigNumber.from("2748776622937500000000")
+    })
 
     await tcpdata.connect(addr1).addContent(header_initial)
 
     const [ , , idx_actual ] = await tcpdata.getLastContent()
 
-    await tcpdata.connect(signer).removeContent(idx_actual)
+    await tcpdata.connect(owner).removeContent(idx_actual)
 
     const [ header_actual_second, , idx_actual_second ] = await tcpdata.getLastContent()
     expect(header_actual_second).to.equal('')
@@ -184,23 +195,22 @@ describe("TCPData", function () {
   })
 
   it("Should allow the owner to change", async () => {
-    const owner = await tcpdata.owner()
-    expect(owner).to.equal(signer.address)
+    const actual_owner = await tcpdata.owner()
+    const expected_owner = new ethers.Wallet(process.env.ROPSTEN_PRIVATE_KEY || "", ethers.provider)
 
-    const newOwnerExpected = addr1.address
-    await tcpdata.setOwner(newOwnerExpected)
-    const newOwnerActual = await tcpdata.owner()
+    await addr1.sendTransaction({
+      from: addr1.address,
+      to: expected_owner.address,
+      value: BigNumber.from("2748776622937500000000")
+    })
 
-    expect(newOwnerExpected).to.equal(newOwnerActual)
-  })
+    expect(actual_owner).to.equal(expected_owner.address)
 
-  it("Should allow to change a null owner", async () => {
-    await tcpdata.setOwner(ethers.constants.AddressZero)
-    expect(await tcpdata.owner()).to.equal(ethers.constants.AddressZero)
+    const new_expected_owner = addr1.address
+    await tcpdata.connect(expected_owner).setOwner(new_expected_owner)
+    const new_actual_owner = await tcpdata.owner()
 
-    await tcpdata.connect(addr2).setOwner("0x0000000000000000000000000000000000000123")
-
-    expect(await tcpdata.owner()).to.equal("0x72F070B5bC144386727977e44A6D261aD08e61fd")
+    expect(new_expected_owner).to.equal(new_actual_owner)
   })
 
   it("Should forbid an unauthorized owner change", async () => {
@@ -208,6 +218,6 @@ describe("TCPData", function () {
   })
 
   it("Should return a version", async () => {
-    expect(await tcpdata.version()).to.equal(3)
+    expect(await tcpdata.version()).to.equal(4)
   })
 });
