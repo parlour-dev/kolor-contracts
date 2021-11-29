@@ -28,7 +28,7 @@ contract TCPData is Initializable {
     }
 
     function version() external pure returns (uint) {
-        return 4;
+        return 5;
     }
 
     function setOwner(address newOwner) external {
@@ -41,14 +41,24 @@ contract TCPData is Initializable {
 
     // CONTENT CREATION AND REMOVAL
 
+    function addContentAs(address payable creator, string calldata newHeader) public {
+        require(msg.sender == owner, "No access");
+        addContentInternal(creator, newHeader);
+    }
+
     function addContent(string calldata newHeader) external {
+        addContentInternal(payable(msg.sender), newHeader);
+    }
+
+    function addContentInternal(address payable creator, string calldata newHeader) private {
         require(bytes(newHeader).length < 2000, "Too large.");
-        content.push(Content({ author: payable(msg.sender), header: newHeader }));
+        content.push(Content({ author: creator, header: newHeader }));
 
         uint idx = content.length-1;
         contentTimestamps[idx] = block.timestamp;
         emit ContentAdded(idx);
     }
+
 
     function removeContent(uint idx) external {
         require(content[idx].author == msg.sender || owner == msg.sender, "No access");

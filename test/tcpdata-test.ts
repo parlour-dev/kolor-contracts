@@ -33,6 +33,35 @@ describe("TCPData", function () {
     expect(idx_actual).to.equal(0)
   })
 
+  it("Should allow to store a value as another user", async () => {
+    const header_expected = '{ "title": "test" }'
+    const owner = new ethers.Wallet(process.env.ROPSTEN_PRIVATE_KEY || "", ethers.provider)
+
+    const author_expected = addr2.address;
+
+    await addr1.sendTransaction({
+      from: addr1.address,
+      to: owner.address,
+      value: BigNumber.from("2748776630297500000001")
+    })
+
+    await tcpdata.connect(owner).addContentAs(author_expected, header_expected)
+
+    expect(await tcpdata.getContentLength()).to.equal(1)
+
+    const [ header_actual, author_actual, idx_actual ] = await tcpdata.getLastContent()
+
+    expect(header_actual).to.equal(header_expected)
+    expect(author_actual).to.equal(author_expected)
+    expect(idx_actual).to.equal(0)
+  })
+
+  it("Should disallow storing a value as another user when not the owner", async () => {
+    const header_expected = '{ "title": "test" }'
+
+    await expect(tcpdata.addContentAs(addr2.address, header_expected)).to.be.revertedWith("No access")
+  })
+
   it("Should save post timestamps", async () => {
     await tcpdata.addContent("{ffff}");
     const [ , , idx_actual ] = await tcpdata.getLastContent()
@@ -218,6 +247,6 @@ describe("TCPData", function () {
   })
 
   it("Should return a version", async () => {
-    expect(await tcpdata.version()).to.equal(4)
+    expect(await tcpdata.version()).to.equal(5)
   })
 });
