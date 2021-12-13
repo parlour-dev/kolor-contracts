@@ -2,8 +2,10 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC777/IERC777RecipientUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC777/IERC777SenderUpgradeable.sol";
 
-contract TCPData is Initializable {
+contract TCPData is IERC777RecipientUpgradeable, IERC777SenderUpgradeable, Initializable {
     event ContentAdded(uint indexed idx);
 
     struct Content {
@@ -20,6 +22,7 @@ contract TCPData is Initializable {
     address public owner;
 
     event TipReceived(uint indexed idx, uint amount);
+    event ERC777TipReceived(uint indexed idx, address indexed author, uint amount);
 
     // MANAGEMENT
 
@@ -80,6 +83,41 @@ contract TCPData is Initializable {
 
     function getContent() external view returns (Content[] memory) {
         return content;
+    }
+
+    // TOKENS (ERC777)
+
+    /**
+     * @dev Called by an {IERC777} token contract whenever tokens are being
+     * moved or created into a registered account (`to`). The type of operation
+     * is conveyed by `from` being the zero address or not.
+     *
+     * This call occurs _after_ the token contract's state is updated, so
+     * {IERC777-balanceOf}, etc., can be used to query the post-operation state.
+     *
+     * This function may revert to prevent the operation from being executed.
+     */
+    function tokensReceived(
+        address operator,
+        address from,
+        address to,
+        uint256 amount,
+        bytes calldata userData,
+        bytes calldata operatorData
+    ) external {
+        emit ERC777TipReceived(1, from, amount);
+        // TODO: instantly relay to author...
+    }
+
+    function tokensToSend(
+        address operator,
+        address from,
+        address to,
+        uint256 amount,
+        bytes calldata userData,
+        bytes calldata operatorData
+    ) external {
+        // ignored...
     }
 
     // TIPPING
