@@ -14,7 +14,7 @@ async function main() {
   await hre.run('compile');
 
   const KolorTokenFactory = await hre.ethers.getContractFactory("KolorToken");
-  const kolor = await upgrades.deployProxy(KolorTokenFactory, ["0x72F070B5bC144386727977e44A6D261aD08e61fd"]);
+  const kolor = await upgrades.deployProxy(KolorTokenFactory);
 
   await kolor.deployed();
 

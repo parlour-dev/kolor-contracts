@@ -2,20 +2,21 @@
 pragma solidity ^0.8.2;
 
 //import "@openzeppelin/contracts-upgradeable/token/ERC777/presets/ERC777PresetFixedSupplyUpgradeable.sol";
-//import "@openzeppelin/contracts-upgradeable/token/ERC777/ERC777Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC777/ERC777Upgradeable.sol";
 //import "@openzeppelin/contracts/token/ERC777/ERC777.sol";
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+//import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract KolorToken is ERC20Upgradeable, OwnableUpgradeable {
-    function initialize(address owner) initializer public {
-        __ERC20_init("KolorTEST", "KOLT");
+contract KolorToken is ERC777Upgradeable, OwnableUpgradeable {
+    function initialize() initializer public {
+        address[] memory defaultOps;
+
+        __ERC777_init("KolorTest777", "KOL7", defaultOps);
         __Ownable_init();
-        _transferOwnership(owner);
     }
 
     function mint(uint256 amount) onlyOwner public {
-        _mint(msg.sender, amount);
+        _mint(msg.sender, amount, "", "");
     }
 }

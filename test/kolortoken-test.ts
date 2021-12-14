@@ -25,6 +25,7 @@ describe("KolorToken", function () {
     await kolor.mint(1000)
 
     expect(await kolor.balanceOf(signer.address)).to.equal(1000)
+    expect(await kolor.totalSupply()).to.equal(1000)
 
     await expect(kolor.connect(addr1).mint(1000)).to.be.revertedWith("Ownable: caller is not the owner")
   })

@@ -104,7 +104,7 @@ contract TCPData is IERC777RecipientUpgradeable, IERC777SenderUpgradeable, Initi
         uint256 amount,
         bytes calldata userData,
         bytes calldata operatorData
-    ) external {
+    ) external override {
         emit ERC777TipReceived(1, from, amount);
         // TODO: instantly relay to author...
     }
@@ -116,7 +116,7 @@ contract TCPData is IERC777RecipientUpgradeable, IERC777SenderUpgradeable, Initi
         uint256 amount,
         bytes calldata userData,
         bytes calldata operatorData
-    ) external {
+    ) external override {
         // ignored...
     }
 
