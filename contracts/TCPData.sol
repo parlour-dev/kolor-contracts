@@ -5,7 +5,14 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC777/IERC777RecipientUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC777/IERC777SenderUpgradeable.sol";
 
-contract TCPData is IERC777RecipientUpgradeable, IERC777SenderUpgradeable, Initializable {
+import "@openzeppelin/contracts/utils/introspection/ERC1820Implementer.sol";
+import "@openzeppelin/contracts/utils/introspection/IERC1820Registry.sol";
+
+import "@openzeppelin/contracts/token/ERC777/IERC777.sol";
+
+import "hardhat/console.sol";
+
+contract TCPData is IERC777RecipientUpgradeable, Initializable, ERC1820Implementer {
     event ContentAdded(uint indexed idx);
 
     struct Content {
@@ -24,10 +31,22 @@ contract TCPData is IERC777RecipientUpgradeable, IERC777SenderUpgradeable, Initi
     event TipReceived(uint indexed idx, uint amount);
     event ERC777TipReceived(uint indexed idx, address indexed author, uint amount);
 
+    // ERC-777 callbacks
+    // https://forum.openzeppelin.com/t/simple-erc777-token-example/746
+    IERC1820Registry private _erc1820;
+    bytes32 constant private TOKENS_RECIPIENT_INTERFACE_HASH = keccak256("ERC777TokensRecipient");
+    bytes32 constant public TOKENS_SENDER_INTERFACE_HASH = keccak256("ERC777TokensSender");
+
+    function senderFor(address account) public {
+        _registerInterfaceForAddress(TOKENS_SENDER_INTERFACE_HASH, account);
+    }
+
     // MANAGEMENT
 
     function initialize() external initializer {
         owner = 0x72F070B5bC144386727977e44A6D261aD08e61fd;
+        _erc1820 = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
+        _erc1820.setInterfaceImplementer(address(this), TOKENS_RECIPIENT_INTERFACE_HASH, address(this));
     }
 
     function version() external pure returns (uint) {
@@ -92,10 +111,7 @@ contract TCPData is IERC777RecipientUpgradeable, IERC777SenderUpgradeable, Initi
      * moved or created into a registered account (`to`). The type of operation
      * is conveyed by `from` being the zero address or not.
      *
-     * This call occurs _after_ the token contract's state is updated, so
-     * {IERC777-balanceOf}, etc., can be used to query the post-operation state.
-     *
-     * This function may revert to prevent the operation from being executed.
+     * @param userData should contain the id of the post TODO: fix this
      */
     function tokensReceived(
         address operator,
@@ -105,19 +121,23 @@ contract TCPData is IERC777RecipientUpgradeable, IERC777SenderUpgradeable, Initi
         bytes calldata userData,
         bytes calldata operatorData
     ) external override {
-        emit ERC777TipReceived(1, from, amount);
-        // TODO: instantly relay to author...
-    }
+        require(userData.length == 52, "wrong data size");
 
-    function tokensToSend(
-        address operator,
-        address from,
-        address to,
-        uint256 amount,
-        bytes calldata userData,
-        bytes calldata operatorData
-    ) external override {
-        // ignored...
+        uint256 idx;
+        address token;
+        bytes memory tmp = userData;
+
+        assembly {
+            idx := mload(add(tmp, 0x20))
+            token := mload(add(tmp, 0x34))
+        }
+
+        require(idx < content.length, "id out of range");
+
+        emit ERC777TipReceived(idx, content[idx].author, amount);
+
+        IERC777 token_contract = IERC777(token);
+        token_contract.send(content[idx].author, amount, "");
     }
 
     // TIPPING
