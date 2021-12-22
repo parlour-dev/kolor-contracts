@@ -149,17 +149,16 @@ describe("TCPData", function () {
   it("Should be able to upgrade", async () => {
     await tcpdata.addContent("{mmmmnnnn}")
 
-    const TestUpgrade = await ethers.getContractFactory("TestUpgrade")
+    const TestUpgrade = await ethers.getContractFactory("TCPData")
 
     const address_expected = tcpdata.address
     const [ , author_expected,  ] = await tcpdata.getLastContent()
 
-    const tcpdata_upgraded: TestUpgrade = await upgrades.upgradeProxy(tcpdata.address, TestUpgrade) as TestUpgrade
+    const tcpdata_upgraded: TCPData = await upgrades.upgradeProxy(tcpdata.address, TestUpgrade) as TCPData
 
     expect(tcpdata_upgraded.address).to.equal(address_expected)
-    expect(await tcpdata_upgraded.test()).to.equal(123)
     
-    const author_actual = await tcpdata_upgraded.getLastContentAuthor()
+    const [, author_actual, ] = await tcpdata_upgraded.getLastContent()
     expect(author_actual).to.equal(author_expected)
   })
 
