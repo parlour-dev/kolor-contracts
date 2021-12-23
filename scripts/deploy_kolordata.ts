@@ -13,12 +13,12 @@ async function main() {
   // manually to make sure everything is compiled
   await hre.run('compile');
 
-  const TCPData = await hre.ethers.getContractFactory("TCPData");
-  const tcpdata = await upgrades.deployProxy(TCPData);
+  const KolorData = await hre.ethers.getContractFactory("KolorData");
+  const kolordata = await upgrades.deployProxy(KolorData);
 
-  await tcpdata.deployed();
+  await kolordata.deployed();
 
-  console.log("TCPData deployed to:", tcpdata.address);
+  console.log("KolorData ERC721 deployed to:", kolordata.address);
 }
 
 main()
