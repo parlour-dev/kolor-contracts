@@ -20,11 +20,10 @@ yarn hardhat node
 node scripts/sample-script.js
 ```
 
-The contract is presently deployed at:
+The v7 contract is presently deployed at:
 
 ```
-Ropsten: 0x0D3E48e537F69d4BDbdc84a1A5BbD70Ad1fD0756
-BSCTestnet: 0xa398De2fEF0b37cf50c2F9D88b8953b94b49c78C
+Ropsten: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
 ```
 
 To get the ABI, first check out the latest version and then run getABI: 

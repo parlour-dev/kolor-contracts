@@ -18,28 +18,29 @@ describe("KolorData", function () {
   })
 
   it("Should be able to store a value", async () => {
-    await expect(kolordata.createPost()).to.emit(kolordata, "ContentAdded").withArgs(1, signer.address)
-    expect(await kolordata.tokenURI(1)).to.equal("https://posts.kolor.social/1")    
+    await expect(kolordata.createPost("testURI")).to.emit(kolordata, "ContentAdded").withArgs(1, signer.address)
+    expect(await kolordata.tokenURI(1)).to.equal("testURI")
   })
 
   it("Should allow to store a value as another user", async () => {
     const author_expected = addr2.address;
-    await expect(kolordata.createPostAs(author_expected)).to.emit(kolordata, "ContentAdded").withArgs(1, addr2.address)
+    await expect(kolordata.createPostAs(author_expected, "testURI")).to.emit(kolordata, "ContentAdded").withArgs(1, addr2.address)
+    expect(await kolordata.tokenURI(1)).to.equal("testURI")
   })
 
   it("Should disallow storing a value as another user when not the owner", async () => {
     const author_expected = addr2.address;
-    await expect(kolordata.connect(addr2).createPostAs(author_expected)).to.be.revertedWith("Ownable: caller is not the owner")
+    await expect(kolordata.connect(addr2).createPostAs(author_expected, "testURI")).to.be.revertedWith("Ownable: caller is not the owner")
   })
 
   it("Should save post timestamps", async () => {
-    await kolordata.createPost()
+    await kolordata.createPost("testURI")
     const id = await kolordata.getLastPostId();
     expect(await kolordata.getPostTimestamp(id)).to.equal((await addr1.provider!.getBlock("latest"))!.timestamp)
   })
 
   it("Should be able to upgrade", async () => {
-    await kolordata.createPost()
+    await kolordata.createPost("testURI")
     const id = await kolordata.getLastPostId()
 
     const TestUpgrade = await ethers.getContractFactory("KolorData")
@@ -50,12 +51,12 @@ describe("KolorData", function () {
 
     expect(kolordata_upgraded.address).to.equal(address_expected)
     
-    const author_actual = await kolordata.ownerOf(id);
-    expect(author_actual).to.equal(signer.address)
+    expect(await kolordata.ownerOf(id)).to.equal(signer.address)
+    expect(await kolordata.tokenURI(id)).to.equal("testURI")
   })
 
   it("Should allow the author to burn posts", async () => {
-    await kolordata.createPost()
+    await kolordata.createPost("testURI")
     const id = await kolordata.getLastPostId()
     
     // (from, to, tokenId)
@@ -63,20 +64,20 @@ describe("KolorData", function () {
   })
 
   it("Should allow the owner to burn posts", async () => {
-    await kolordata.connect(addr1).createPost()
+    await kolordata.connect(addr1).createPost("testURI")
     const id = await kolordata.getLastPostId()
 
     await expect(kolordata.connect(signer).burnPost(id)).to.emit(kolordata, "Transfer").withArgs(addr1.address, ethers.constants.AddressZero, id)
   })
 
   it("Should forbid non-authors to burn a post", async () => {
-    await kolordata.connect(addr1).createPost()
+    await kolordata.connect(addr1).createPost("testURI")
     const id = await kolordata.getLastPostId()
     await expect(kolordata.connect(addr2).burnPost(id)).to.be.revertedWith("Not allowed")
   })
 
   it("Should forbid too late removals", async () => { 
-    await kolordata.createPost();
+    await kolordata.createPost("testURI");
     const id = await kolordata.getLastPostId()
 
     // advance the clock by 3 days (in seconds) and mine a block with the modified timestamp

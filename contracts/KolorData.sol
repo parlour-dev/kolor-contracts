@@ -5,8 +5,9 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 
-contract KolorData is ERC721Upgradeable, OwnableUpgradeable {
+contract KolorData is ERC721URIStorageUpgradeable, OwnableUpgradeable {
     event ContentAdded(uint indexed idx, address indexed author);
 
     using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -16,35 +17,36 @@ contract KolorData is ERC721Upgradeable, OwnableUpgradeable {
 
     function initialize() public initializer {
         __ERC721_init("KolorData", "POST");
+        __ERC721URIStorage_init();
         __Ownable_init();
     }
 
-    function _baseURI() internal pure override returns (string memory) {
-        return "https://posts.kolor.social/";
-    }
-
     function version() external pure returns (uint256) {
-        return 6;
+        return 7;
     }
 
-    function createPost() external returns (uint256) {
+    function createPost(string memory uri) external returns (uint256) {
         _tokenIds.increment();
 
         uint256 newItemId = _tokenIds.current();
         _mint(msg.sender, newItemId);
         postTimestamps[newItemId] = block.timestamp;
 
+        _setTokenURI(newItemId, uri);
+
         emit ContentAdded(newItemId, msg.sender);
 
         return newItemId;
     }
 
-    function createPostAs(address poster) onlyOwner external returns (uint256) {
+    function createPostAs(address poster, string memory uri) onlyOwner external returns (uint256) {
         _tokenIds.increment();
 
         uint256 newItemId = _tokenIds.current();
         _mint(poster, newItemId);
         postTimestamps[newItemId] = block.timestamp;
+
+        _setTokenURI(newItemId, uri);
 
         emit ContentAdded(newItemId, poster);
 
