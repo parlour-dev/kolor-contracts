@@ -23,7 +23,7 @@ node scripts/sample-script.js
 The v7 contract is presently deployed at:
 
 ```
-Ropsten: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+Ropsten: 0x0531aFBb877b438D213A39681D97F29Ddf53a51a
 ```
 
 To get the ABI, first check out the latest version and then run getABI: 
