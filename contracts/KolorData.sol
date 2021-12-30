@@ -16,7 +16,7 @@ contract KolorData is ERC721URIStorageUpgradeable, OwnableUpgradeable {
     mapping(uint256 => uint256) postTimestamps;
 
     function initialize() public initializer {
-        __ERC721_init("KolorData", "POST");
+        __ERC721_init("Kolor Posts", "POST");
         __ERC721URIStorage_init();
         __Ownable_init();
     }

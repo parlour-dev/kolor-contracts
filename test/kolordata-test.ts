@@ -98,6 +98,6 @@ describe("KolorData", function () {
   })
 
   it("Should return a version", async () => {
-    expect(await kolordata.version()).to.equal(6)
+    expect(await kolordata.version()).to.equal(7)
   })
 });
