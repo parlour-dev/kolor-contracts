@@ -39,6 +39,11 @@ const config: HardhatUserConfig = {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       accounts: [`0x${process.env.ROPSTEN_PRIVATE_KEY}`]
     },
+    bsc: {
+      chainId: 56,
+      url: "https://bsc-dataseed.binance.org/",
+      accounts: [`0x${process.env.BSC_PRIVATE_KEY}`]
+    },
     hardhat: {
       chainId: 1337
     }
